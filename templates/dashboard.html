@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Add custom styles if needed */
+      .card {
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <br />
+    <center>
+      <h1>Welcome {{user_name}}!</h1>
+    </center>
+    <div class="container mt-4">
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <div class="card">
+            <center>
+              <div class="card-body">
+                <h5 class="card-title">View your Reports.</h5>
+                <p class="card-text">Navigate to your Reports.</p>
+                <a href="/view" class="btn btn-primary">View Reports</a>
+              </div>
+            </center>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card">
+            <center>
+              <div class="card-body">
+                <h5 class="card-title">View others Reports.</h5>
+                <p class="card-text">Navigate to others Reports.</p>
+                <a
+                  href="javascript:void(alert('Coming Soon!'));"
+                  class="btn btn-primary"
+                  >Other Reports</a
+                >
+              </div>
+            </center>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card">
+            <center>
+              <div class="card-body">
+                <h5 class="card-title">Manage your Comments.</h5>
+                <p class="card-text">Navigate to the Comments Dashboard.</p>
+                <a
+                  href="javascript:void(alert('Coming Soon!'));"
+                  class="btn btn-primary"
+                  >Comments</a
+                >
+              </div>
+            </center>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card">
+            <center>
+              <div class="card-body">
+                <h5 class="card-title">Approve Reports</h5>
+                <p class="card-text">Navigate to the Approve Section.</p>
+                <a
+                  href="javascript:void(alert('Coming Soon!'));"
+                  class="btn btn-primary"
+                  >Approve Reports</a
+                >
+              </div>
+            </center>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-4">
+        <div class="col">
+          <div class="card">
+            <center>
+              <div class="card-body">
+                <h5 class="card-title">Create Report</h5>
+                <p class="card-text">Go to the Report Editor.</p>
+                <a href="/create" class="btn btn-primary">Create Report</a>
+              </div>
+            </center>
+          </div>
+        </div>
+      </div>
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <div class="alert alert-dismissible alert-danger">
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+        ></button>
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

@@ -1,13 +1,17 @@
 from flask import Flask, request, redirect, render_template, flash, session
 from flask_session import Session
+from flask_socketio import SocketIO, emit, join_room, leave_room
 import sqlite3
+import os
 import re
 import bcrypt
 
 app = Flask(__name__)
-app.secret_key = '$2b$12$VM9NXi3BIPaqhiP5uuwJmu'
+app.secret_key = os.urandom(24)
+app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
+socketio = SocketIO(app)
 
 
 def create_database():
@@ -174,8 +178,111 @@ def validate_password(password):
 
 
 @app.route('/')
-def index():
-    return 'Database schema created successfully!'
+def dashboard():
+    if 'username' in session:
+        return render_template("dashboard.html", user_name=session['username'])
+    flash('Kindly Login to access the dashboard', 'error')
+    return redirect('/login')
+
+
+@app.route('/view')
+def viewAll():
+    if 'username' in session:
+        conn = sqlite3.connect('cybersecurity_reports.db')
+        cursor = conn.cursor()
+        # Fetch report from the database based on the report_id
+        cursor.execute(
+            "SELECT * FROM Reports ")
+        report = cursor.fetchall()
+
+        ids, titles = [], []
+
+        for reports in report:
+            ids.append(reports[0])
+            titles.append(reports[1])
+
+        if report:
+            # print(report)
+            return render_template("viewAll.html", ids=ids, titles=titles, size=len(ids), user=session['username'])
+        else:
+            flash('Report not found!', 'error')
+            return redirect('/')
+    else:
+        flash('Kindly Login to access the dashboard', 'error')
+        return redirect('/login')
+
+
+@app.route('/view/<int:report_id>')
+def view(report_id):
+    if 'username' in session:
+        conn = sqlite3.connect('cybersecurity_reports.db')
+        cursor = conn.cursor()
+        # Fetch report from the database based on the report_id
+        cursor.execute(
+            "SELECT * FROM Reports WHERE ReportID = ?", (report_id,))
+        report = cursor.fetchone()
+
+        if report:
+            return render_template("view.html", title=report[1], body=report[2])
+        else:
+            flash('Report not found!', 'error')
+            return redirect('/')
+    else:
+        flash('Kindly Login to access the dashboard', 'error')
+        return redirect('/login')
+
+
+@app.route('/create', methods=['GET', 'POST'])
+def create():
+    if 'username' in session:
+        if request.method == 'POST':
+            title = request.form['title']
+            description = request.form['description']
+            if not title:
+                flash('Title required to Proceed.', 'error')
+                return render_template("create.html", user=session['username'])
+
+            conn = sqlite3.connect('cybersecurity_reports.db')
+            cursor = conn.cursor()
+
+            # Insert data into the Reports table
+            cursor.execute('''
+                INSERT INTO Reports (Title, Description, UserID)
+                VALUES (?, ?, ?)
+            ''', (title, description, session['username']))  # Replace 1 with the actual UserID
+
+            # Commit changes and close connection
+            conn.commit()
+            conn.close()
+
+            flash('Succesfully Saved', 'success')
+
+        # If it's a GET request, render the form
+        return render_template("create.html", user=session['username'])
+    flash('Kindly Login to access the dashboard', 'error')
+    return redirect('/login')
+
+
+@app.route('/live')
+def live():
+    if 'username' in session:
+        return render_template("live.html", user=session['username'])
+    flash('Kindly Login to access the dashboard', 'error')
+    return redirect('/login')
+
+
+@socketio.on('join')
+def handle_join(user):
+    room = user
+    join_room(room)
+
+
+@socketio.on('send_data_event')
+def send_data(data):
+    room = data.get('user')
+    emitted_data = data.get('data')
+    if room and emitted_data:
+        emit('update_para', emitted_data, room=room)
 
 
 @app.route('/signup', methods=['GET', 'POST'])
