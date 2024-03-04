@@ -214,22 +214,23 @@ def viewAll():
 
 @app.route('/view/<int:report_id>')
 def view(report_id):
-    if 'username' in session:
-        conn = sqlite3.connect('cybersecurity_reports.db')
-        cursor = conn.cursor()
-        # Fetch report from the database based on the report_id
-        cursor.execute(
-            "SELECT * FROM Reports WHERE ReportID = ?", (report_id,))
-        report = cursor.fetchone()
+    conn = sqlite3.connect('cybersecurity_reports.db')
+    cursor = conn.cursor()
+    # Fetch report from the database based on the report_id
+    cursor.execute(
+        "SELECT * FROM Reports WHERE ReportID = ?", (report_id,))
+    report = cursor.fetchone()
 
-        if report:
-            return render_template("view.html", title=report[1], body=report[2])
-        else:
-            flash('Report not found!', 'error')
-            return redirect('/')
+    if report:
+        title = report[1]
+        body = report[2].replace('\n', '<br>')
+        return render_template("view.html", title=title, body=body)
     else:
-        flash('Kindly Login to access the dashboard', 'error')
-        return redirect('/login')
+        flash('Report not found!', 'error')
+        return redirect('/')
+    # else:
+    #     flash('Kindly Login to access the dashboard', 'error')
+    #     return redirect('/login')
 
 
 @app.route('/create', methods=['GET', 'POST'])
@@ -265,8 +266,7 @@ def create():
 
 @app.route('/live')
 def live():
-    if 'username' in session:
-        return render_template("live.html", user=session['username'])
+    return render_template("live.html", user='Samuel')
     flash('Kindly Login to access the dashboard', 'error')
     return redirect('/login')
 

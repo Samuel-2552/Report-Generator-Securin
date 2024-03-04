@@ -3,67 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ubuntu Console</title>
-    <style>
-      body {
-        font-family: "Ubuntu Mono", monospace;
-        background-color: #300a24;
-        color: #ffffff;
-        padding: 20px;
-      }
-      .console {
-        background-color: #2c001e;
-        border-radius: 5px;
-        padding: 20px;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-        overflow-y: auto;
-        position: relative;
-        height: 300px;
-      }
-      .console p {
-        margin: 5px 0;
-        line-height: 1.5;
-      }
-      .close-button {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        color: #ff4d4d;
-        cursor: pointer;
-      }
-      .close-button:hover {
-        color: #ff1a1a;
-      }
-      .prompt-symbol {
-        color: #8abeb7;
-        font-weight: bold;
-      }
-      .prompt-command {
-        color: #ffffff;
-      }
-    </style>
+    <title>Upload Image</title>
   </head>
   <body>
-    <div class="console">
-      <span class="close-button">&times;</span>
-      <p>
-        <span class="prompt-symbol">$</span>
-        <span class="prompt-command">ls</span>
-      </p>
-      <p>file1.txt file2.txt folder</p>
-      <p>
-        <span class="prompt-symbol">></span>
-        <span class="prompt-command">cd folder</span>
-      </p>
-      <p>
-        <span class="prompt-symbol">$</span>
-        <span class="prompt-command">ls</span>
-      </p>
-      <p>subfolder1 subfolder2 file3.txt</p>
-      <p>
-        <span class="prompt-symbol">$</span>
-        <span class="prompt-command">exit</span>
-      </p>
-    </div>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="imageFile" id="imageFile" accept="image/*" />
+      <input type="submit" value="Upload Image" />
+    </form>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#uploadForm").submit(function (event) {
+          event.preventDefault();
+          var formData = new FormData();
+          var inputFile = $("#imageFile")[0].files[0];
+
+          if (!inputFile) {
+            alert("Please select an image file.");
+            return;
+          }
+
+          // Check if the selected file is an image
+          if (!inputFile.type.match("image.*")) {
+            alert("Please select only image files.");
+            return;
+          }
+
+          formData.append("imageFile", inputFile);
+
+          $.ajax({
+            url: "/upload",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+              alert(response.filename);
+            },
+            error: function (xhr, status, error) {
+              console.error(xhr.responseText);
+            },
+          });
+        });
+      });
+    </script>
   </body>
 </html>
